@@ -1,2 +1,2 @@
-# Assignment 3 Task 3 & 4
+# Assignment 3
 Task 3 & Task 4
