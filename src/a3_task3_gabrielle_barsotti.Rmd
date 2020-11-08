@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 library(janitor)
+library(kableExtra)
+library(lubridate)
 ```
 
 ## Read in the Data
@@ -18,4 +20,89 @@ library(janitor)
 urchin_data <- read_csv(here("data", "urchins.csv")) %>% 
   clean_names()
 ```
+
+## Exploring data visulization
+
+  - comparing the sizes between purple and red sea urchins
+  - Minimal updates to the data tables
+  
+urchin_red_purple <- urchin_data %>%
+  select(size, common_name)
+  
+```{r}
+ggplot(data = urchin_data, aes(x = size)) +
+  geom_histogram(bins = 15) +
+  facet_wrap(~common_name) +
+  labs(x = "Urchin Size",
+       y = "Count")
+
+```
+  
+```{r}
+ggplot(data = urchin_data, aes(x = common_name, y = size)) +
+  geom_boxplot()
+
+```
+ 
+### Summary Table & Descriptive Statistics
+
+```{r}
+urchin_stats <- urchin_data %>% 
+  group_by(common_name) %>%
+  summarize(mean = mean(size),
+            median = median(size),
+            sd = sd(size),
+            sample_size = n())
+            
+  kbl(urchin_stats) %>% 
+    kable_styling()
+```
+
+### Calculations for difference in mean
+```{r}
+4.469797 - 6.776489
+```
+
+### Calculation for percent difference
+```{r}
+(6.776489 - 4.469797) / ((4.469797 + 6.776489) / 2) *100
+```
+
+## Description
+----
+
+## Section 2 
+```{r}
+urchin_clean_dates <- urchin_data %>% 
+  mutate(date = mdy(date))
+
+class(urchin_clean_dates$date)
+  
+purple_urchin <- urchin_clean_dates %>%
+  filter(common_name == "Purple Urchin") %>%
+  mutate(date = ymd(date)) %>% 
+  mutate(year = year(date)) %>%
+  mutate(site_full = recode(site, "NAPL" = "Naples Reef", "AQUE" = "Arroyo Quemado Reef", "CARP" = "Carpinteria Reef",
+                            "MOHK" = "Mohawk Reef", "IVEE" = "Isla Vista Reef"))
+  
+```
+ 
+## Summary table for the above data set
+
+```{r}
+purple_urchin_total <- purple_urchin %>%
+  select("site_full", "year") %>% 
+  group_by(site_full, year) %>% 
+  count(site_full)
+  
+```
+
+```{r}
+ggplot(data = purple_urchin_total, aes(x = year, y = n)) +
+  geom_col(aes(color = site_full)) +
+  facet_wrap(~site_full)
+```
+
+
+
 
