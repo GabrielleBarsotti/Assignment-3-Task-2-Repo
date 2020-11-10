@@ -1,0 +1,118 @@
+---
+title: "a3_task4_gabrielle_barsotti"
+author: "Gabrielle Barsotti"
+date: "11/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(kableExtra)
+library(lubridate)
+```
+
+## Summary 
+
+- In this document I will be exploring the purple and red sea urchin data at one specific location - Naples Reef
+
+## Reading in the urchin data set
+
+```{r}
+urchin_data <- read_csv(here("data", "urchins.csv")) %>% 
+  clean_names()
+```
+
+## Exploring the Naples Reef urchins 
+
+- Basic wrangling for purple urchins observed in January 2010 for Naples Reef
+
+```{r}
+# Here I am cleaning the dates and converting to "Date" class
+urchin_dates_clean <- urchin_data %>% 
+  mutate(date = mdy(date))
+
+class(urchin_dates_clean$date)
+
+purple_urchin_naples <- urchin_dates_clean %>%
+  filter(common_name == "Purple Urchin", site == "NAPL") %>%
+  mutate(date = ymd(date)) %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% # Created a new column for month
+  mutate(site = recode(site, "NAPL" = "Naples Reef"))
+```
+
+## Exploring the data with a Histogram
+
+- Looking at size distribution for each of the treatments (Control and Annual) to assess normality
+
+```{r}
+naples_purple_jan2010 <- purple_urchin_naples %>% 
+  filter(year == "2010", month == "1") # first I needed to make a subset with only purple urchin in Naples Reef in January 2010
+
+ggplot(data = naples_purple_jan2010, aes(x = size)) +  # Histogram
+  geom_histogram(bins = 15) +  
+  facet_wrap(~treatment) +
+  labs(x = "Size",
+       y = "Count")
+  
+```
+
+## Exploring the data with a Quantile-quantile plot
+
+```{r}
+ggplot(data = naples_purple_jan2010, aes(sample = size)) +
+  geom_qq() +
+  facet_wrap(~treatment) +
+  labs(x = "Theoretical",
+       y = "Sample")
+```
+
+## Description 
+
+- The histogram and the QQ-plot show me that there is mostly a linear relationship between the Annual and Control data samples at Naples reef for Purple sea urchins. There a few outliers in the size however for the most part the mean size seems to be normally distributed and bell shaped in the histogram
+
+## Data Summary Table
+
+```{r}
+naples_summary <- naples_purple_jan2010 %>% 
+  group_by(treatment) %>% 
+  summarize(naples_mean = mean(size),
+            naples_median = median(size),
+            naples_sd = sd(size),
+            naples_n = n())
+
+  kbl(naples_summary) %>% 
+    kable_styling()
+```
+
+## Creating a 2 Sample T-test
+
+- Creating my two separate vectors that contain observation from each sample 
+
+```{r}
+annual_sample <- naples_purple_jan2010 %>%
+  filter(treatment == "ANNUAL") %>% 
+  pull(size)
+
+control_sample <- naples_purple_jan2010 %>% 
+  filter(treatment == "CONTROL") %>% 
+  pull(size)
+  
+t.test(x = annual_sample, control_sample)
+```
+
+```{r}
+3.916667 - 3.725806
+```
+
+## Description
+
+- The actual mean of both samples are 3.92for annual and 3.72 for control. The annual sample size for purple sea urchin is just slightly larger than that of the control sample size by .19 centimeters. I have a 95 % confidence interval of -0.1386165  0.5203369 so within this percent I could expect to find the population mean within that range. The mean size of purple sea urchins in the Naples Reef area calculated at n = 0 for my two sample t-test.
+
+## P-Value Statement
+
+- The result of p = 0.2536 means that there is a 25% chance of getting means that are at least this different, if they're drawn from populations with the same mean size. 
+
