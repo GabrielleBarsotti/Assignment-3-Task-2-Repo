@@ -41,7 +41,9 @@ ggplot(data = urchin_data, aes(x = size)) +
   
 ```{r}
 ggplot(data = urchin_data, aes(x = common_name, y = size)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(x = "Common Name",
+       y = "Size")
 
 ```
  
