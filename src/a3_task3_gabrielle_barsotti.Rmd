@@ -14,7 +14,11 @@ library(kableExtra)
 library(lubridate)
 ```
 
-## Read in the Data
+## Summary
+
+- In this document I will be exploring the difference between purple and red sea urchins located off the Santa Barbara Coast. The data was taken from red and purple sea urchins at 5 different locations. 
+
+## Read in the Urchin Data
 
 ```{r message = FALSE}
 urchin_data <- read_csv(here("data", "urchins.csv")) %>% 
@@ -23,11 +27,8 @@ urchin_data <- read_csv(here("data", "urchins.csv")) %>%
 
 ## Exploring data visulization
 
-  - comparing the sizes between purple and red sea urchins
-  - Minimal updates to the data tables
-  
-urchin_red_purple <- urchin_data %>%
-  select(size, common_name)
+  - Using the data to compare the sizes between purple and red sea urchins
+  - Only need to do minimal updates to the data tables
   
 ```{r}
 ggplot(data = urchin_data, aes(x = size)) +
@@ -46,7 +47,9 @@ ggplot(data = urchin_data, aes(x = common_name, y = size)) +
  
 ### Summary Table & Descriptive Statistics
 
-```{r}
+- This summary table will look at the mean, median and standard diviation of both purple and red sea urchins
+
+```{r message = FALSE}
 urchin_stats <- urchin_data %>% 
   group_by(common_name) %>%
   summarize(mean = mean(size),
@@ -58,9 +61,9 @@ urchin_stats <- urchin_data %>%
     kable_styling()
 ```
 
-### Calculations for difference in mean
+### Calculation for difference in mean
 ```{r}
-4.469797 - 6.776489
+6.776489 - 4.469797
 ```
 
 ### Calculation for percent difference
@@ -68,11 +71,13 @@ urchin_stats <- urchin_data %>%
 (6.776489 - 4.469797) / ((4.469797 + 6.776489) / 2) *100
 ```
 
-## Description
-----
+### Description
 
-## Section 2 
-```{r}
+- There is a 2.31 centimeter difference in the mean diameter between the purple and red sea urchin. The mean diameter of red urchin data samples is 2.31 centimeters or a 41.02% larger than the mean diameter of the purple urchin data samples.
+
+## Section 2 : Exploring purple urchin count by site and year
+
+```{r message = FALSE}
 urchin_clean_dates <- urchin_data %>% 
   mutate(date = mdy(date))
 
@@ -87,7 +92,9 @@ purple_urchin <- urchin_clean_dates %>%
   
 ```
  
-## Summary table for the above data set
+### Summary table 
+ 
+- This table contains the total number of purple urchins observed by site and year.
 
 ```{r}
 purple_urchin_total <- purple_urchin %>%
@@ -97,10 +104,17 @@ purple_urchin_total <- purple_urchin %>%
   
 ```
 
+### Made an exploritory graph 
+
+- This graph shows the counts of purple urchins recorded at each site over time for years included in the summary table 
+
 ```{r}
 ggplot(data = purple_urchin_total, aes(x = year, y = n)) +
   geom_col(aes(color = site_full)) +
-  facet_wrap(~site_full)
+  facet_wrap(~site_full) +
+  labs(x = "Count",
+       y = "Year",
+       title = "Annual Purple Sea Urchin Count by Location_Barsotti")
 ```
 
 
